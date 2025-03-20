@@ -160,7 +160,7 @@ The application follows a Clean Architecture approach with feature-first organiz
   │          │    │ Provider │    │          │    │          │
   └──────────┘    └──────────┘    └──────────┘    └──────────┘
                                                        │
-  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌───▼──────┐
+  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌────▼─────┐
   │ UI       │◄───│ BLoC/    │◄───│ Entity   │◄───│Data      │
   │ Update   │    │ Provider │    │ Models   │    │Source    │
   └──────────┘    └──────────┘    └──────────┘    └──────────┘
