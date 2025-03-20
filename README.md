@@ -1,4 +1,4 @@
-# InsightEd
+# InsightEd Mobile Application
 
 An offline-first educational management system for schools in rural areas.
 
