@@ -121,9 +121,9 @@ InsightEdApp (main.dart)
 ### Student Registration Flow
 
 ```
-┌──────────┐      ┌──────────────┐      ┌────────────┐      ┌───────────┐      ┌──────────┐
+┌──────────┐      ┌───────────────┐      ┌────────────┐      ┌───────────┐      ┌──────────┐
 │  UI/Form │      │StudentProvider│      │ Repository │      │Local Store│      │ Firebase │
-└────┬─────┘      └───────┬──────┘      └─────┬──────┘      └─────┬─────┘      └────┬─────┘
+└────┬─────┘      └───────┬───────┘      └─────┬──────┘      └─────┬─────┘      └────┬─────┘
      │                    │                    │                   │                 │
      │ Enter Details      │                    │                   │                 │
      │───────────────────>│                    │                   │                 │
@@ -156,9 +156,9 @@ InsightEdApp (main.dart)
 ### Data Synchronization Flow
 
 ```
-┌──────────────┐      ┌─────────────┐      ┌───────────┐      ┌──────────┐
-│SyncService   │      │ Repository  │      │Local Store│      │ Firebase │
-└──────┬───────┘      └──────┬──────┘      └─────┬─────┘      └────┬─────┘
+┌──────────────┐      ┌─────────────┐       ┌───────────┐      ┌──────────┐
+│SyncService   │      │ Repository  │       │Local Store│      │ Firebase │
+└──────┬───────┘      └──────┬──────┘       └─────┬─────┘      └────┬─────┘
        │                     │                    │                 │
        │ Check Connectivity  │                    │                 │
        │─┐                   │                    │                 │
@@ -187,7 +187,7 @@ InsightEdApp (main.dart)
        │────────────────────>│                    │                 │
        │                     │                    │                 │
        │                     │ Update Local Store │                 │
-       │                     │──────────────────>│                  │
+       │                     │───────────────────>│                 │
        │                     │                    │                 │
        │                     │<──Update Complete──│                 │
        │                     │                    │                 │
@@ -317,7 +317,7 @@ The application implements a resilient network layer with the following componen
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                   API Service                           │
+│                   API Service                          │
 ├────────────────────────────────────────────────────────┤
 │ - handleRequest(endpoint, method, data)                │
 │ - getDiagnostics()                                     │
@@ -325,7 +325,7 @@ The application implements a resilient network layer with the following componen
                           │
                           ▼
 ┌────────────────────────────────────────────────────────┐
-│                Connectivity Service                     │
+│                Connectivity Service                    │
 ├────────────────────────────────────────────────────────┤
 │ - checkConnectivity()                                  │
 │ - listenToConnectivityChanges()                        │
@@ -334,7 +334,7 @@ The application implements a resilient network layer with the following componen
                           │
                           ▼
 ┌────────────────────────────────────────────────────────┐
-│                  Request Queue                          │
+│                  Request Queue                         │
 ├────────────────────────────────────────────────────────┤
 │ - enqueue(request)                                     │
 │ - processQueue()                                       │
@@ -343,7 +343,7 @@ The application implements a resilient network layer with the following componen
                           │
                           ▼
 ┌────────────────────────────────────────────────────────┐
-│            Firebase/Custom Backend API                  │
+│            Firebase/Custom Backend API                 │
 └────────────────────────────────────────────────────────┘
 ```
 
