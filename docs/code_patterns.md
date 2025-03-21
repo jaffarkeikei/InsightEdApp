@@ -840,4 +840,154 @@ The application's architecture is designed with the following extension points i
 
 4. **Multiple Authentication Providers**: Additional authentication providers can be added by extending the AuthService.
 
-5. **Localization**: The application is structured to support additional languages by adding localization files and using the Flutter localization system. 
+5. **Localization**: The application is structured to support additional languages by adding localization files and using the Flutter localization system.
+
+## Database Implementation and Synchronization
+
+### SQLite Schema
+
+The application uses SQLite for persistent local storage, with a schema designed for offline-first operations:
+
+```sql
+-- Classes table schema
+CREATE TABLE classes (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  grade TEXT NOT NULL,
+  teacher_id TEXT,
+  teacher_name TEXT,
+  academic_year TEXT NOT NULL,
+  term TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  is_synced INTEGER DEFAULT 0
+)
+```
+
+Each table includes an `is_synced` column that tracks whether data has been synchronized with the remote server. This enables efficient tracking of local changes that need to be pushed to the cloud when connectivity becomes available.
+
+### Data Model Mapping
+
+Models follow a consistent pattern for converting between domain entities and database representations:
+
+```dart
+// Converting from database map to entity
+ClassGroup _convertToClass(Map<String, dynamic> map) {
+  return ClassGroup(
+    id: map['id'],
+    name: map['name'],
+    description: map['description'],
+    grade: map['grade'],  // Matches database column name
+    teacherId: map['teacher_id'],
+    teacherName: map['teacher_name'],
+    academicYear: int.parse(map['academic_year']),
+    term: int.parse(map['term'] ?? '1'),
+    createdAt: DateTime.parse(map['created_at']),
+    updatedAt: DateTime.parse(map['updated_at']),
+  );
+}
+
+// Converting from entity to database map
+Map<String, dynamic> _toMap(ClassGroup classGroup) {
+  return {
+    'id': classGroup.id,
+    'name': classGroup.name,
+    'description': classGroup.description,
+    'grade': classGroup.grade,  // Matches database column name
+    'teacher_id': classGroup.teacherId,
+    'teacher_name': classGroup.teacherName,
+    'academic_year': classGroup.academicYear.toString(),
+    'term': classGroup.term.toString(),
+    'created_at': classGroup.createdAt.toIso8601String(),
+    'updated_at': classGroup.updatedAt.toIso8601String(),
+  };
+}
+```
+
+> **Important Update (June 2023)**: Fixed column naming consistency in the ClassLocalDataSourceImpl to use 'grade' instead of 'grade_level', aligning with the database schema definition. This resolved class creation failures.
+
+### Synchronization Service
+
+The `SyncService` manages bidirectional synchronization between local and remote data sources:
+
+```dart
+class SyncService {
+  final NetworkInfo networkInfo;
+  final List<SyncableRepository> repositories;
+  
+  // Timer for periodic sync
+  Timer? _periodicSyncTimer;
+  static const Duration _syncInterval = Duration(minutes: 15);
+  
+  // Sync status reporting
+  final StreamController<SyncStatus> _syncStatusController =
+      StreamController<SyncStatus>.broadcast();
+  Stream<SyncStatus> get syncStatusStream => _syncStatusController.stream;
+  
+  // Core synchronization process
+  Future<void> synchronizeData() async {
+    // Check connectivity
+    if (!await networkInfo.isConnected) {
+      // Handle offline mode
+      return;
+    }
+    
+    // Sync each repository
+    for (final repository in repositories) {
+      try {
+        await repository.syncData();
+        // Track success
+      } catch (e) {
+        // Handle and report errors
+      }
+    }
+  }
+}
+```
+
+### Repository Synchronization Pattern
+
+Each repository implements the `SyncableRepository` interface with a consistent synchronization pattern:
+
+1. Fetch unsynced local records
+2. Push each record to the remote service (create or update)
+3. Mark successfully synced records
+4. Pull all remote records to ensure local data is complete
+
+```dart
+@override
+Future<void> syncData() async {
+  // Get unsynced local records
+  final unsyncedRecords = await localDataSource.getUnsyncedRecords();
+  
+  // Push to remote
+  for (final record in unsyncedRecords) {
+    await remoteDataSource.updateRecord(record);
+    await localDataSource.markRecordAsSynced(record.id);
+  }
+  
+  // Pull from remote
+  final remoteRecords = await remoteDataSource.getAllRecords();
+  await localDataSource.cacheRecords(remoteRecords);
+}
+```
+
+### Connection Monitoring
+
+The application continuously monitors network connectivity and triggers synchronization when a connection becomes available:
+
+```dart
+void startMonitoring() {
+  networkInfo.connectivityStream.listen((status) {
+    if (status == ConnectivityStatus.connected) {
+      synchronizeData();
+    }
+  });
+  
+  // Set up periodic sync
+  _periodicSyncTimer = Timer.periodic(_syncInterval, (_) {
+    synchronizeData();
+  });
+}
+``` 

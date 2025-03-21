@@ -124,11 +124,66 @@ InsightEd employs an offline-first strategy using:
 
 ### Data Synchronization
 
-1. App regularly checks for connectivity
-2. When connectivity is established:
-   - Local changes are pushed to Firebase/Firestore
-   - Remote changes are pulled and integrated with local data
-   - Conflicts are resolved based on timestamps and predefined rules
+### Synchronization Mechanism
+
+InsightEd implements a robust data synchronization system to ensure data consistency between local and remote databases:
+
+1. **Offline-First Approach**: All data operations are performed locally first, ensuring the app works without internet
+2. **Change Tracking**: Each database table includes an `is_synced` column to track which records need synchronization
+3. **Bidirectional Sync**: Data flows both ways - local to remote and remote to local
+4. **Automatic Connectivity Detection**: The app monitors network state and triggers sync when connectivity is available
+5. **Periodic Sync**: Scheduled synchronization runs every 15 minutes when online
+6. **Error Handling**: Synchronization errors are logged and reported to the user
+
+### Recent Improvements (June 2023)
+
+1. **Database Schema Consistency**: Fixed field naming inconsistencies between domain models and database schema
+   - Resolved issue with class creation by aligning column names (`grade` vs `grade_level`)
+   - Standardized naming patterns across all entities
+
+2. **SyncService Initialization**: Improved the initialization flow of the SyncService ensuring it starts properly with the application
+
+3. **Repository Synchronization**: Enhanced the syncData() implementation in repositories with better error handling and logging
+
+4. **Connection Monitoring**: Improved the reliability of network state detection and connectivity monitoring
+
+### Synchronization Flow
+
+```
+┌─────────────────┐                     ┌─────────────────┐
+│                 │   Connectivity      │                 │
+│  Local Actions  │────Detected────────►│  SyncService    │
+│                 │                     │                 │
+└────────┬────────┘                     └────────┬────────┘
+         │                                       │
+         │ Local                                 │ Process
+         │ First                                 │ Each
+         │                                       │ Repository
+         ▼                                       ▼
+┌─────────────────┐                     ┌─────────────────┐
+│                 │                     │                 │
+│  Local Storage  │◄────────────────────│  Push Unsynced  │
+│  (SQLite)       │   Mark as Synced    │  Records        │
+│                 │                     │                 │
+└────────┬────────┘                     └────────┬────────┘
+         │                                       │
+         │                                       │
+         │                                       │
+         ▼                                       ▼
+┌─────────────────┐                     ┌─────────────────┐
+│                 │                     │                 │
+│  Updated Local  │◄────────────────────│  Pull Remote    │
+│  Database       │   Cache Records     │  Records        │
+│                 │                     │                 │
+└─────────────────┘                     └─────────────────┘
+```
+
+### Future Synchronization Enhancements
+
+1. **Conflict Resolution**: Implement more sophisticated conflict resolution strategies
+2. **Selective Sync**: Allow users to choose which data to prioritize during synchronization
+3. **Background Sync**: Implement true background synchronization that works even when app is closed
+4. **Sync Progress Indicators**: Provide more detailed feedback on synchronization progress
 
 ### Key Features
 

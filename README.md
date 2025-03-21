@@ -16,6 +16,24 @@ InsightEd provides a comprehensive solution for managing educational workflows i
 
 ## Development Notes
 
+### Recent Updates (June 2023)
+
+1. **Database Improvements**:
+   - Fixed database schema inconsistencies in the class management module
+   - Resolved column naming mismatch (`grade` vs `grade_level`) that was preventing class creation
+   - Enhanced error handling in database operations
+
+2. **Synchronization Enhancements**:
+   - Improved SyncService initialization and lifecycle management
+   - Added comprehensive logging for synchronization operations
+   - Implemented periodic sync on 15-minute intervals when online
+   - Enhanced connectivity detection reliability
+
+3. **General Fixes**:
+   - Removed unnecessary splash screen message
+   - Improved database transaction handling
+   - Added better error reporting during data operations
+
 ### Known Issues and Fixes
 
 1. **Plugin Compatibility Issues**:
