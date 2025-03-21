@@ -23,7 +23,7 @@ class _CreateClassPageState extends State<CreateClassPage> {
 
   // Selected values
   String? _selectedLevel;
-  List<String> _selectedSubjects = [];
+  final List<String> _selectedSubjects = [];
   Color _selectedColor = ColorConstants.primaryColor;
 
   // All subjects

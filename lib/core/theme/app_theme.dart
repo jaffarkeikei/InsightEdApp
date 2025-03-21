@@ -75,17 +75,31 @@ class AppTheme {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
+      iconTheme: const IconThemeData(color: Colors.white),
+      actionsIconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+      ),
     );
   }
 
   static AppBarTheme get _darkAppBarTheme {
     return AppBarTheme(
       elevation: 0,
-      backgroundColor: ColorConstants.darkSurfaceColor,
+      backgroundColor: ColorConstants.primaryColor,
       foregroundColor: Colors.white,
       centerTitle: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+      ),
+      iconTheme: const IconThemeData(color: Colors.white),
+      actionsIconTheme: const IconThemeData(color: Colors.white),
+      titleTextStyle: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
       ),
     );
   }

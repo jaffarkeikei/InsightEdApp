@@ -25,14 +25,21 @@ class DashboardAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
       centerTitle: centerTitle,
-      backgroundColor: Colors.white,
+      backgroundColor: ColorConstants.primaryColor,
+      foregroundColor: Colors.white,
       elevation: 1,
       leading:
           showBackButton
               ? IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: onBackPressed ?? () => Navigator.of(context).pop(),
               )
               : null,

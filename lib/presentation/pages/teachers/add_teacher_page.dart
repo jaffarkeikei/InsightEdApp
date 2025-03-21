@@ -30,8 +30,8 @@ class _AddTeacherPageState extends State<AddTeacherPage> {
   // Selected values
   String? _selectedGender;
   DateTime? _selectedDate;
-  List<ClassModel> _selectedClasses = [];
-  List<String> _selectedSubjects = [];
+  final List<ClassModel> _selectedClasses = [];
+  final List<String> _selectedSubjects = [];
 
   // Mock class data
   final List<ClassModel> _classes = [

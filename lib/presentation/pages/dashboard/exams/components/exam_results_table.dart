@@ -21,8 +21,8 @@ class ExamResultsTable extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
         child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) => classColor.withOpacity(0.1),
+          headingRowColor: WidgetStateProperty.resolveWith<Color>(
+            (Set<WidgetState> states) => classColor.withOpacity(0.1),
           ),
           headingTextStyle: TextStyle(
             fontWeight: FontWeight.bold,
@@ -50,7 +50,7 @@ class ExamResultsTable extends StatelessWidget {
                   color:
                       index % 2 == 0
                           ? null
-                          : MaterialStateProperty.all(Colors.grey.shade50),
+                          : WidgetStateProperty.all(Colors.grey.shade50),
                   cells: [
                     DataCell(Text('${index + 1}')),
                     DataCell(

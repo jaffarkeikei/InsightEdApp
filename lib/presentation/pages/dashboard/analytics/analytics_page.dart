@@ -138,8 +138,8 @@ class _AnalyticsPageState extends State<AnalyticsPage>
           // Generate report action
           _showReportOptionsDialog(context);
         },
-        child: const Icon(Icons.analytics),
         tooltip: 'Generate Report',
+        child: const Icon(Icons.analytics),
       ),
     );
   }

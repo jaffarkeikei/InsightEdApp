@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:insighted/core/constants/color_constants.dart';
-import 'package:insighted/presentation/widgets/dashboard_app_bar.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});

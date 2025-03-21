@@ -3,7 +3,6 @@ import 'package:insighted/core/constants/color_constants.dart';
 import 'package:insighted/presentation/models/class_model.dart';
 import 'package:insighted/presentation/pages/dashboard/classes/class_details/class_details_page.dart';
 import 'package:insighted/presentation/pages/classes/create_class_page.dart';
-import 'package:insighted/presentation/widgets/dashboard_app_bar.dart';
 
 class ClassManagementPage extends StatefulWidget {
   const ClassManagementPage({super.key});

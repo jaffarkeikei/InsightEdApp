@@ -112,7 +112,7 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -205,9 +205,13 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Academic Performance',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
         ),
         const SizedBox(height: 16),
         Container(
@@ -218,7 +222,12 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
+                color: const Color.fromARGB(
+                  255,
+                  255,
+                  255,
+                  255,
+                ).withOpacity(0.1),
                 spreadRadius: 1,
                 blurRadius: 6,
                 offset: const Offset(0, 3),
@@ -341,7 +350,7 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -450,7 +459,7 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: const Color.fromARGB(255, 255, 255, 255).withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
@@ -595,7 +604,7 @@ class _ClassComparisonWidgetState extends State<ClassComparisonWidget> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: const Color.fromARGB(252, 252, 252, 252).withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),

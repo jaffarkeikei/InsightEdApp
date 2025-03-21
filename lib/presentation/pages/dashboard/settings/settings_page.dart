@@ -6,7 +6,6 @@ import 'package:insighted/presentation/pages/dashboard/settings/widgets/notifica
 import 'package:insighted/presentation/pages/dashboard/settings/widgets/security_settings_widget.dart';
 import 'package:insighted/presentation/pages/dashboard/settings/widgets/school_settings_widget.dart';
 import 'package:insighted/presentation/pages/auth/login_page.dart';
-import 'package:insighted/presentation/widgets/dashboard_app_bar.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -17,7 +16,8 @@ class SettingsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Settings'),
         elevation: 1,
-        backgroundColor: Colors.white,
+        backgroundColor: ColorConstants.primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
