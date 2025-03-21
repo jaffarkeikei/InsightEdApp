@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:insighted/core/constants/color_constants.dart';
+import 'package:insighted/core/services/service_locator.dart';
+import 'package:insighted/data/repositories/student_repository_impl.dart';
+import 'package:insighted/data/repositories/class_repository_impl.dart';
+import 'package:insighted/domain/entities/student.dart' as domain;
+import 'package:insighted/domain/entities/class_group.dart';
 import 'package:insighted/presentation/components/form_field_widget.dart';
 import 'package:insighted/presentation/components/dropdown_field_widget.dart';
 import 'package:insighted/presentation/models/class_model.dart';
@@ -31,51 +36,107 @@ class _AddStudentPageState extends State<AddStudentPage> {
   ClassModel? _selectedClass;
   DateTime? _selectedDate;
 
-  // Mock class data
-  final List<ClassModel> _classes = [
-    ClassModel(
-      id: '1',
-      name: 'Grade 4',
-      section: 'A',
-      studentCount: 32,
-      teacherCount: 8,
-      classTeacher: 'Mrs. Jane Smith',
-      subjects: ['Mathematics', 'English', 'Science', 'Social Studies', 'Art'],
-      level: 'Upper Primary',
-      color: Colors.blue,
-    ),
-    ClassModel(
-      id: '2',
-      name: 'Grade 5',
-      section: 'A',
-      studentCount: 35,
-      teacherCount: 9,
-      classTeacher: 'Mr. John Doe',
-      subjects: [
-        'Mathematics',
-        'English',
-        'Science',
-        'Social Studies',
-        'Music',
-      ],
-      level: 'Upper Primary',
-      color: Colors.green,
-    ),
-    ClassModel(
-      id: '3',
-      name: 'Grade 6',
-      section: 'A',
-      studentCount: 28,
-      teacherCount: 8,
-      classTeacher: 'Mrs. Sarah Johnson',
-      subjects: ['Mathematics', 'English', 'Science', 'Social Studies', 'PE'],
-      level: 'Upper Primary',
-      color: Colors.orange,
-    ),
-  ];
+  // Classes data
+  List<ClassModel> _classes = [];
+  bool _isLoadingClasses = true;
+  bool _isLoading = false; // For form submission
 
-  // Loading state
-  bool _isLoading = false;
+  @override
+  void initState() {
+    super.initState();
+    _loadClasses();
+  }
+
+  // Load classes from the repository
+  Future<void> _loadClasses() async {
+    setState(() {
+      _isLoadingClasses = true;
+    });
+
+    try {
+      final classRepository = ServiceLocator().get<ClassRepository>();
+      final domainClasses = await classRepository.getAllClasses();
+
+      // Convert domain classes to presentation model
+      final classes =
+          domainClasses
+              .map(
+                (domainClass) => ClassModel(
+                  id: domainClass.id,
+                  name:
+                      domainClass.name
+                          .split(' ')
+                          .first, // Assuming format "Grade X"
+                  section:
+                      domainClass.name.contains(' ')
+                          ? domainClass.name.split(' ').last
+                          : 'A',
+                  studentCount:
+                      0, // Will be updated when we implement student count
+                  teacherCount:
+                      0, // Will be updated when we implement teacher count
+                  classTeacher: domainClass.teacherName ?? 'Unassigned',
+                  subjects: [],
+                  level: _determineLevelFromName(domainClass.name),
+                  color: _getRandomColor(domainClass.id),
+                ),
+              )
+              .toList();
+
+      setState(() {
+        _classes = classes;
+        _isLoadingClasses = false;
+      });
+    } catch (e) {
+      print('Error loading classes: $e');
+      setState(() {
+        _isLoadingClasses = false;
+        // Fallback to some default classes if loading fails
+        _classes = [
+          ClassModel(
+            id: '1',
+            name: 'Grade 4',
+            section: 'A',
+            studentCount: 0,
+            teacherCount: 0,
+            classTeacher: 'Unassigned',
+            subjects: [],
+            level: 'Primary',
+            color: Colors.blue,
+          ),
+        ];
+      });
+    }
+  }
+
+  // Helper to determine education level from class name
+  String _determineLevelFromName(String className) {
+    final name = className.toLowerCase();
+    if (name.contains('grade')) {
+      final gradeNumber =
+          int.tryParse(name.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+
+      if (gradeNumber <= 6) return 'Primary';
+      if (gradeNumber <= 9) return 'Junior Secondary';
+      return 'Senior Secondary';
+    }
+    return 'Unspecified';
+  }
+
+  // Generate color based on class ID for consistency
+  Color _getRandomColor(String id) {
+    final colors = [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+    ];
+
+    final colorIndex = id.hashCode % colors.length;
+    return colors[colorIndex];
+  }
 
   @override
   void dispose() {
@@ -132,13 +193,13 @@ class _AddStudentPageState extends State<AddStudentPage> {
       });
 
       try {
-        // Simulate network delay
-        await Future.delayed(const Duration(seconds: 1));
+        // Get the student repository through the service locator
+        final studentRepository = ServiceLocator().get<StudentRepository>();
 
-        // Create new student object
-        final newStudent = Student(
+        // Create presentation layer student model
+        final presentationStudent = Student(
           id:
-              'S${DateTime.now().millisecondsSinceEpoch.toString().substring(0, 8)}', // Generate temporary ID
+              'S${DateTime.now().millisecondsSinceEpoch.toString().substring(0, 8)}',
           firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
           dateOfBirth: _dobController.text,
@@ -152,16 +213,38 @@ class _AddStudentPageState extends State<AddStudentPage> {
           admissionDate: DateFormat('yyyy-MM-dd').format(DateTime.now()),
         );
 
-        // In a real app, you would save this to a database
-        // For now, just print the student info and show success
-        debugPrint('New student created: ${newStudent.toJson()}');
+        // Convert to domain entity
+        final domainStudent = domain.Student(
+          id: presentationStudent.id,
+          name:
+              '${presentationStudent.firstName} ${presentationStudent.lastName}',
+          studentNumber:
+              'STD${DateTime.now().millisecondsSinceEpoch.toString().substring(0, 6)}',
+          gender: presentationStudent.gender,
+          classId: presentationStudent.classId,
+          className: presentationStudent.className,
+          photoUrl: null,
+          dateOfBirth: DateFormat(
+            'yyyy-MM-dd',
+          ).parse(presentationStudent.dateOfBirth),
+          parentId: null,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
+        // Save to database using repository
+        await studentRepository.saveStudent(domainStudent);
+
+        debugPrint(
+          'New student saved to database: ${presentationStudent.fullName}',
+        );
 
         // Show success message and navigate back
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Student ${newStudent.fullName} added successfully!',
+                'Student ${presentationStudent.fullName} added successfully!',
               ),
               backgroundColor: Colors.green,
             ),
@@ -178,6 +261,7 @@ class _AddStudentPageState extends State<AddStudentPage> {
             ),
           );
         }
+        print('Error saving student: $e');
       } finally {
         // Reset loading state
         if (mounted) {
@@ -192,14 +276,47 @@ class _AddStudentPageState extends State<AddStudentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add New Student'),
-        backgroundColor: ColorConstants.primaryColor,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Add New Student'), elevation: 0),
       body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
+          _isLoadingClasses
+              ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading classes...'),
+                  ],
+                ),
+              )
+              : _classes.isEmpty
+              ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 64,
+                      color: Colors.orange,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'No classes available',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text('Please add classes before adding students.'),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: _loadClasses,
+                      child: Text('Retry'),
+                    ),
+                  ],
+                ),
+              )
               : SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(
@@ -334,25 +451,35 @@ class _AddStudentPageState extends State<AddStudentPage> {
                       const SizedBox(height: 24),
 
                       // Submit button
-                      SizedBox(
+                      Container(
                         width: double.infinity,
-                        height: 50,
+                        margin: const EdgeInsets.symmetric(vertical: 16),
                         child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorConstants.primaryColor,
-                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 15),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          onPressed: _submitForm,
-                          child: const Text(
-                            'Add Student',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          child:
+                              _isLoading
+                                  ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                      SizedBox(width: 12),
+                                      Text('Saving...'),
+                                    ],
+                                  )
+                                  : const Text('Add Student'),
                         ),
                       ),
                     ],

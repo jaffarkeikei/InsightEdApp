@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:insighted/core/constants/color_constants.dart';
+import 'package:insighted/core/services/service_locator.dart';
+import 'package:insighted/data/repositories/class_repository_impl.dart';
 import 'package:insighted/presentation/models/class_model.dart';
 import 'package:insighted/presentation/pages/dashboard/exams/exam_results_page.dart';
 
@@ -28,6 +30,56 @@ class _ClassDetailsPageState extends State<ClassDetailsPage>
     super.dispose();
   }
 
+  // Delete class from database
+  Future<void> _deleteClass() async {
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Class'),
+            content: Text(
+              'Are you sure you want to delete ${widget.classModel.name} ${widget.classModel.section}? ' +
+                  'This action cannot be undone and will remove all students associated with this class.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirmed == true) {
+      try {
+        // Get repository and delete class
+        final classRepository = ServiceLocator().get<ClassRepository>();
+        await classRepository.deleteClass(widget.classModel.id);
+
+        // Show success message and go back
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Class deleted successfully')),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to delete class: $e')));
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,6 +87,13 @@ class _ClassDetailsPageState extends State<ClassDetailsPage>
         title: Text('${widget.classModel.name} ${widget.classModel.section}'),
         backgroundColor: widget.classModel.color,
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: _deleteClass,
+            tooltip: 'Delete class',
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,

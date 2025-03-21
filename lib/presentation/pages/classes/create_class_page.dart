@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:insighted/core/constants/color_constants.dart';
+import 'package:insighted/core/services/service_locator.dart';
+import 'package:insighted/data/repositories/class_repository_impl.dart';
+import 'package:insighted/domain/entities/class_group.dart';
 import 'package:insighted/presentation/components/form_field_widget.dart';
 import 'package:insighted/presentation/components/dropdown_field_widget.dart';
 import 'package:insighted/presentation/models/class_model.dart';
@@ -114,10 +117,7 @@ class _CreateClassPageState extends State<CreateClassPage> {
       });
 
       try {
-        // Simulate network delay
-        await Future.delayed(const Duration(seconds: 1));
-
-        // Create new class object
+        // Create presentation model for UI
         final newClass = ClassModel(
           id:
               'C${DateTime.now().millisecondsSinceEpoch.toString().substring(0, 8)}', // Generate temporary ID
@@ -130,14 +130,26 @@ class _CreateClassPageState extends State<CreateClassPage> {
           level: _selectedLevel!,
           color: _selectedColor,
         );
-
-        // In a real app, you would save this to a database
-        // For now, just print the class info and show success
-        debugPrint(
-          'New class created: ${newClass.id} - ${newClass.name} ${newClass.section}',
+        
+        // Create domain entity for database
+        final classRepository = ServiceLocator().get<ClassRepository>();
+        final domainClass = ClassGroup(
+          id: '', // Will be assigned by repository
+          name: '${newClass.name} ${newClass.section}',
+          description: 'Class for ${newClass.level} level',
+          grade: newClass.name,
+          teacherId: null,
+          teacherName: newClass.classTeacher,
+          academicYear: DateTime.now().year,
+          term: 1,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
+        
+        // Save to database
+        await classRepository.saveClass(domainClass);
 
-        // Show success message and navigate back with the new class
+        // Show success message and return to previous screen with the new class
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -159,6 +171,7 @@ class _CreateClassPageState extends State<CreateClassPage> {
             ),
           );
         }
+        print('Error creating class: $e');
       } finally {
         // Reset loading state
         if (mounted) {
@@ -377,14 +390,30 @@ class _CreateClassPageState extends State<CreateClassPage> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          onPressed: _submitForm,
-                          child: const Text(
-                            'Create Class',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          onPressed: _isLoading ? null : _submitForm,
+                          child: _isLoading
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text('Creating class...'),
+                                  ],
+                                )
+                              : const Text(
+                                  'Create Class',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
