@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'package:insighted/core/utils/network_info.dart';
-import 'package:insighted/data/repositories/student_repository_impl.dart';
+
+// Define a common interface for repositories that can be synced
+abstract class SyncableRepository {
+  Future<void> syncData();
+}
 
 class SyncService {
   final NetworkInfo networkInfo;
-  final List<StudentRepository> repositories;
+  final List<SyncableRepository> repositories;
 
   // We'll add more repositories as they're implemented
 

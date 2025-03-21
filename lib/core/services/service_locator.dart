@@ -3,8 +3,11 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:insighted/core/database/database_helper.dart';
 import 'package:insighted/core/services/sync_service.dart';
 import 'package:insighted/core/utils/network_info.dart';
+import 'package:insighted/data/datasources/local/class_local_datasource.dart';
 import 'package:insighted/data/datasources/local/student_local_datasource.dart';
+import 'package:insighted/data/datasources/remote/class_remote_datasource.dart';
 import 'package:insighted/data/datasources/remote/student_remote_datasource.dart';
+import 'package:insighted/data/repositories/class_repository_impl.dart';
 import 'package:insighted/data/repositories/student_repository_impl.dart';
 
 class ServiceLocator {
@@ -52,6 +55,15 @@ Future<void> setupDependencies() async {
     StudentRemoteDataSourceImpl(firestore: firestore),
   );
 
+  // Class data sources
+  locator.register<ClassLocalDataSource>(
+    ClassLocalDataSourceImpl(dbHelper: databaseHelper),
+  );
+
+  locator.register<ClassRemoteDataSource>(
+    ClassRemoteDataSourceImpl(firestore: firestore),
+  );
+
   // Repositories
   final studentRepository = StudentRepositoryImpl(
     localDataSource: locator.get<StudentLocalDataSource>(),
@@ -60,11 +72,18 @@ Future<void> setupDependencies() async {
   );
   locator.register<StudentRepository>(studentRepository);
 
-  // Sync service (will be expanded as we add more repositories)
+  final classRepository = ClassRepositoryImpl(
+    localDataSource: locator.get<ClassLocalDataSource>(),
+    remoteDataSource: locator.get<ClassRemoteDataSource>(),
+    networkInfo: locator.get<NetworkInfo>(),
+  );
+  locator.register<ClassRepository>(classRepository);
+
+  // Sync service
   locator.register<SyncService>(
     SyncService(
       networkInfo: locator.get<NetworkInfo>(),
-      repositories: [studentRepository],
+      repositories: [studentRepository, classRepository],
     ),
   );
 }

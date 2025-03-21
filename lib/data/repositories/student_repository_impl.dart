@@ -1,17 +1,17 @@
+import 'package:insighted/core/services/sync_service.dart';
 import 'package:insighted/core/utils/network_info.dart';
 import 'package:insighted/data/datasources/local/student_local_datasource.dart';
 import 'package:insighted/data/datasources/remote/student_remote_datasource.dart';
 import 'package:insighted/domain/entities/student.dart';
 import 'package:uuid/uuid.dart';
 
-abstract class StudentRepository {
+abstract class StudentRepository implements SyncableRepository {
   Future<List<Student>> getAllStudents();
   Future<Student?> getStudentById(String id);
   Future<void> saveStudent(Student student);
   Future<void> updateStudent(Student student);
   Future<void> deleteStudent(String id);
   Future<List<Student>> getStudentsByClass(String classId);
-  Future<void> syncData();
 }
 
 class StudentRepositoryImpl implements StudentRepository {

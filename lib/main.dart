@@ -3,8 +3,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:insighted/core/services/service_locator.dart';
 import 'package:insighted/core/services/sync_service.dart';
 import 'package:insighted/core/theme/app_theme.dart';
+import 'package:insighted/data/repositories/class_repository_impl.dart';
+import 'package:insighted/data/repositories/student_repository_impl.dart';
 import 'package:insighted/presentation/pages/auth/login_page.dart';
 import 'package:insighted/presentation/pages/splash/splash_page.dart';
+import 'package:insighted/presentation/providers/class_provider.dart';
+import 'package:insighted/presentation/providers/student_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -39,10 +43,24 @@ class InsightEdApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final syncService = ServiceLocator().get<SyncService>();
+    final studentRepository = ServiceLocator().get<StudentRepository>();
+    final classRepository = ServiceLocator().get<ClassRepository>();
 
     return MultiProvider(
       providers: [
-        // Add providers as needed for repositories
+        // Provide repositories
+        Provider<StudentRepository>(create: (_) => studentRepository),
+        Provider<ClassRepository>(create: (_) => classRepository),
+
+        // Provide repository providers
+        ChangeNotifierProvider<StudentProvider>(
+          create: (_) => StudentProvider(repository: studentRepository),
+        ),
+        ChangeNotifierProvider<ClassProvider>(
+          create: (_) => ClassProvider(repository: classRepository),
+        ),
+
+        // Stream provider for sync status
         StreamProvider<SyncStatus>(
           create: (_) => syncService.syncStatusStream,
           initialData: SyncStatus(

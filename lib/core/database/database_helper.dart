@@ -54,9 +54,12 @@ class DatabaseHelper {
       CREATE TABLE classes (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        grade_level TEXT NOT NULL,
+        description TEXT,
+        grade TEXT NOT NULL,
         teacher_id TEXT,
+        teacher_name TEXT,
         academic_year TEXT NOT NULL,
+        term TEXT NOT NULL,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL,
         is_synced INTEGER DEFAULT 0
